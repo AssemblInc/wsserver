@@ -1,0 +1,16 @@
+{
+  "name": "assembl-wsserver",
+  "version": "1.0.0",
+  "description": "Assembl Websocket Server (websocket.io)",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://freekbes@bitbucket.org/assemblch/assembl-wsserver.git"
+  },
+  "author": "Assembl Inc.",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/assemblch/assembl-wsserver#readme"
+}
