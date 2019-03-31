@@ -12,5 +12,11 @@
   },
   "author": "Assembl Inc.",
   "license": "ISC",
-  "homepage": "https://bitbucket.org/assemblch/assembl-wsserver#readme"
+  "homepage": "https://bitbucket.org/assemblch/assembl-wsserver#readme",
+  "dependencies": {
+    "console": "^0.7.2",
+    "fs": "0.0.1-security",
+    "https": "^1.0.0",
+    "socket.io": "^2.2.0"
+  }
 }
