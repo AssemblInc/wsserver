@@ -39,6 +39,9 @@ function hasAssemblID(socketID) {
 }
 
 function isOnline(assemblID) {
+    console.log("Checking if " + assemblID + " is online...");
+    console.log(Object.values(assemblIDs));
+    console.log(Object.values(assemblIDs).indexOf(assemblID));
     return Object.values(assemblIDs).indexOf(assemblID) > -1;
 }
 
@@ -72,7 +75,10 @@ io.on('connect', function(socket) {
         
     });
     socket.on('disconnect', function(reason) {
-
+        assemblIDs[socket.id] = null;
+        otherData[socket.id] = null;
+        delete assemblIDs[socket.id];
+        delete otherData[socket.id];
     });
     socket.on('error', function(error) {
 
@@ -88,8 +94,9 @@ io.on('connect', function(socket) {
     socket.on('as_send_event_to_sender', function(eventName, data) {
         if (hasAssemblID(socket.id)) {
             let connected = getConnectedSocketID(socket);
+            let connectedAssemblID = getAssemblID(connected);
             if (connected != null) {
-                if (isOnline(connected)) {
+                if (isOnline(connectedAssemblID)) {
                     socket.to(connected).emit("as_event_for_sender", eventName, data);
                     socket.emit("as_success", "event_sent_to_sender", "Event sent to sender");
                 }
