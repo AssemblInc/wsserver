@@ -7,7 +7,10 @@ const server = require('https').createServer({
     requestCert: false,
     rejectUnauthorized: false
 });
-const io = require('socket.io')(server);
+const io = require('socket.io')(server, {
+    pingInterval: 50000,
+    pingTimeout: 150000
+});
 // io.origins(['https://www.assembl.science:443', 'https://app.assembl.science:443']);
 
 let assemblIDs = {};
@@ -39,9 +42,6 @@ function hasAssemblID(socketID) {
 }
 
 function isOnline(assemblID) {
-    console.log("Checking if " + assemblID + " is online...");
-    console.log(Object.values(assemblIDs));
-    console.log(Object.values(assemblIDs).indexOf(assemblID));
     return Object.values(assemblIDs).indexOf(assemblID) > -1;
 }
 
@@ -75,6 +75,7 @@ io.on('connect', function(socket) {
         
     });
     socket.on('disconnect', function(reason) {
+        console.log(socket.id + " disconnected for reason: " + reason);
         assemblIDs[socket.id] = null;
         otherData[socket.id] = null;
         delete assemblIDs[socket.id];
@@ -83,15 +84,26 @@ io.on('connect', function(socket) {
     socket.on('error', function(error) {
 
     });
-    socket.on('as_send_chunk', function(chunk) {
-        socket.to(socket.id).emit("as_chunk_for_receiver", chunk);
+    socket.on('as_send_chunk', function(chunk, number) {
+        // console.log(Date.now() + " - " + socket.id + " sending chunk to receiver");
+        socket.to(socket.id).emit("as_chunk_for_receiver", chunk, number);
         socket.emit("as_success", "chunk_sent_to_receiver", "Chunk sent to receiver");
+        // console.log(Date.now() + " - " + socket.id + " chunk sent to receiver");
+    });
+    socket.on('as_send_unencrypted_chunk', function(chunk, number) {
+        // console.log(Date.now() + " - " + socket.id + " sending unencrypted chunk to receiver");
+        socket.to(socket.id).emit("as_unencrypted_chunk_for_receiver", chunk, number);
+        socket.emit("as_success", "chunk_sent_to_receiver", "Chunk sent to receiver");
+        // console.log(Date.now() + " - " + socket.id + " unencrypted chunk sent to receiver");
     });
     socket.on('as_send_event', function(eventName, data) {
+        // console.log(Date.now() + " - " + socket.id + " sending event to receiver");
         socket.to(socket.id).emit("as_event_for_receiver", eventName, data);
         socket.emit("as_success", "event_sent_to_receiver", "Event sent to receiver");
+        // console.log(Date.now() + " - " + socket.id + " event sent to receiver");
     });
     socket.on('as_send_event_to_sender', function(eventName, data) {
+        console.log(Date.now() + " - " + socket.id + " sending event to sender");
         if (hasAssemblID(socket.id)) {
             let connected = getConnectedSocketID(socket);
             let connectedAssemblID = getAssemblID(connected);
@@ -99,6 +111,7 @@ io.on('connect', function(socket) {
                 if (isOnline(connectedAssemblID)) {
                     socket.to(connected).emit("as_event_for_sender", eventName, data);
                     socket.emit("as_success", "event_sent_to_sender", "Event sent to sender");
+                    console.log(Date.now() + " - " + socket.id + " event sent to sender");
                 }
                 else {
                     socket.emit("as_error", "client_not_connected", "Sender is offline");
@@ -156,6 +169,10 @@ io.on('connect', function(socket) {
 
 server.listen(2998);
 console.log("Server is up and running on port 2998");
+
+setInterval(function(){
+    global.gc();
+}, 30000);
 
 process.on('SIGTERM', function() {
     console.log("Stopping server...");
