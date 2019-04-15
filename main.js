@@ -171,7 +171,7 @@ server.listen(2998);
 console.log("Server is up and running on port 2998");
 
 setInterval(function(){
-    global.gc();
+    // global.gc();
 }, 30000);
 
 process.on('SIGTERM', function() {
