@@ -16,6 +16,7 @@ const ss = require('socket.io-stream');
 
 let assemblIDs = {};
 let otherData = {};
+let outgoingStreams = {};
 let requiredOtherData = ["assembl_id", "orcid_id", "user_name"];
 requiredOtherData = requiredOtherData.sort();
 let assemblIDPattern = /^AS([A-z0-9]{10})$/;
@@ -72,6 +73,17 @@ function getUserData(socketID) {
 io.on('connect', function(socket) {
     assemblIDs[socket.id] = false;
     otherData[socket.id] = {};
+    outgoingStreams[socket.id] = ss.createStream();
+    outgoingStreams[socket.id].on('end', function() {
+        console.log(Date.now() + " - " + socket.id + " outgoingStream ended");
+    });
+    outgoingStreams[socket.id].on('finish', function() {
+        console.log(Date.now() + " - " + socket.id + " outgoingStream finished");
+    });
+    outgoingStreams[socket.id].on('error', function(err) {
+        console.log(Date.now() + " - " + socket.id + " experienced an error");
+        console.error(err);
+    });
     socket.on('disconnecting', function(reason) {
         
     });
@@ -79,8 +91,10 @@ io.on('connect', function(socket) {
         console.log(socket.id + " disconnected for reason: " + reason);
         assemblIDs[socket.id] = null;
         otherData[socket.id] = null;
+        outgoingStreams[socket.id] = null;
         delete assemblIDs[socket.id];
         delete otherData[socket.id];
+        delete outgoingStreams[socket.id];
     });
     socket.on('error', function(error) {
 
@@ -99,7 +113,7 @@ io.on('connect', function(socket) {
     });
     ss(socket).on('as_send_stream', function(stream) {
         console.log(Date.now() + " - " + socket.id + " sending stream to receiver");
-        ss(socket.to(socket.id)).emit('as_stream_for_receiver', stream);
+        stream.pipe(outgoingStreams[socket.id]);
         console.log(Date.now() + " - " + socket.id + " stream sent to receiver");
     });
     socket.on('as_send_event', function(eventName, data) {
@@ -140,6 +154,7 @@ io.on('connect', function(socket) {
                 socket.join(otherSocketID);
                 socket.to(otherSocketID).emit("as_connection_made", userData["assembl_id"], userData["user_name"], userData["orcid_id"]);
                 socket.emit("as_success", "connection_established", "Connected to " + assembl_id);
+                ss(socket).emit('as_stream_for_receiver', outgoingStreams[otherSocketID]);
                 socket.emit("as_connected_to", senderData["assembl_id"], senderData["user_name"], senderData["orcid_id"]);
             }
             else {
