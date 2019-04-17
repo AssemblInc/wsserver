@@ -12,6 +12,7 @@ const io = require('socket.io')(server, {
     pingTimeout: 150000
 });
 // io.origins(['https://www.assembl.science:443', 'https://app.assembl.science:443']);
+const ss = require('socket.io-stream');
 
 let assemblIDs = {};
 let otherData = {};
@@ -95,6 +96,11 @@ io.on('connect', function(socket) {
         socket.to(socket.id).emit("as_unencrypted_chunk_for_receiver", chunk, number);
         socket.emit("as_success", "chunk_sent_to_receiver", "Chunk sent to receiver");
         // console.log(Date.now() + " - " + socket.id + " unencrypted chunk sent to receiver");
+    });
+    ss(socket).on('as_send_stream', function(stream) {
+        console.log(Date.now() + " - " + socket.id + " sending stream to receiver");
+        ss(socket.to(socket.id)).emit('as_stream_for_receiver', stream);
+        console.log(Date.now() + " - " + socket.id + " stream sent to receiver");
     });
     socket.on('as_send_event', function(eventName, data) {
         // console.log(Date.now() + " - " + socket.id + " sending event to receiver");
