@@ -85,7 +85,11 @@ io.on('connect', function(socket) {
         console.error(err);
     });
     socket.on('disconnecting', function(reason) {
-        
+        let rooms = Object.keys(socket.rooms);
+        for (let r = 0; r < rooms.length; r++) {
+            console.log("Sending disconnect message to room " + rooms[r]);
+            socket.to(rooms[r]).emit("as_disconnecting", assemblIDs[socket.id], reason);
+        }
     });
     socket.on('disconnect', function(reason) {
         console.log(socket.id + " disconnected for reason: " + reason);
