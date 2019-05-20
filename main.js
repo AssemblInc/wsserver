@@ -151,14 +151,42 @@ io.on('connect', function(socket) {
                 let otherSocketID = getSocketID(assembl_id);
                 let userData = getUserData(socket.id);
                 let senderData = getUserData(otherSocketID);
-                socket.join(otherSocketID);
-                socket.to(otherSocketID).emit("as_connection_made", userData["assembl_id"], userData["user_name"], userData["orcid_id"]);
-                socket.emit("as_success", "connection_established", "Connected to " + assembl_id);
-                ss(socket).emit('as_stream_for_receiver', outgoingStreams[otherSocketID]);
-                socket.emit("as_connected_to", senderData["assembl_id"], senderData["user_name"], senderData["orcid_id"]);
+                socket.to(otherSocketID).emit("as_connection_request", userData["assembl_id"], userData["user_name"], userData["orcid_id"]);
+                socket.emit("as_connecting_to", senderData["assembl_id"], senderData["user_name"], senderData["orcid_id"]);
             }
             else {
                 socket.emit("as_error", "client_not_connected", assembl_id + " is offline");
+            }
+        }
+        else {
+            socket.emit("as_error", "no_assembl_id", "Send your data using the as_my_data event before sending any events.");
+        }
+    });
+    socket.on('as_connection_accepted', function(assembl_id) {
+        if (hasAssemblID(socket.id)) {
+            if (isOnline(assembl_id)) {
+                let otherSocketID = getSocketID(assembl_id);
+                let userData = getUserData(socket.id);
+                let receiverData = getUserData(otherSocketID);
+                let receiverSocket = io.sockets.connected[otherSocketID];
+                receiverSocket.join(socket.id);
+                receiverSocket.to(socket.id).emit("as_connection_made", receiverData["assembl_id"], receiverData["user_name"], receiverData["orcid_id"]);
+                receiverSocket.emit("as_success", "connection_established", "Connected to " + userData["assembl_id"]);
+                ss(receiverSocket).emit('as_stream_for_receiver', outgoingStreams[socket.id]);
+                receiverSocket.emit("as_connected_to", userData["assembl_id"], userData["user_name"], userData["orcid_id"]);
+            }
+        }
+        else {
+            socket.emit("as_error", "no_assembl_id", "Send your data using the as_my_data event before sending any events.");
+        }
+    });
+    socket.on('as_connection_rejected', function(assembl_id) {
+        if (hasAssemblID(socket.id)) {
+            if (isOnline(assembl_id)) {
+                let otherSocketID = getSocketID(assembl_id);
+                let userData = getUserData(socket.id);
+                let receiverSocket = io.sockets.connected[otherSocketID];
+                receiverSocket.emit("as_connection_rejected", userData["assembl_id"], userData["user_name"], userData["orcid_id"]);
             }
         }
         else {
