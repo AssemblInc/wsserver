@@ -19,7 +19,7 @@ let otherData = {};
 let outgoingStreams = {};
 let requiredOtherData = ["assembl_id", "orcid_id", "user_name"];
 requiredOtherData = requiredOtherData.sort();
-let assemblIDPattern = /^AS([A-z0-9]{10})$/;
+let assemblIDPattern = /^AS([A-Z0-9]{10})$/;
 
 function swap(json){
     var ret = {};
