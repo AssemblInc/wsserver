@@ -1,9 +1,9 @@
 const console = require('console');
 const fs = require('fs');
 const server = require('https').createServer({
-    key: fs.readFileSync("/etc/letsencrypt/live/socket.assembl.ch/privkey.pem"),
-    cert: fs.readFileSync("/etc/letsencrypt/live/socket.assembl.ch/cert.pem"),
-    ca: fs.readFileSync("/etc/letsencrypt/live/socket.assembl.ch/chain.pem"),
+    key: fs.readFileSync("/etc/letsencrypt/live/accounts.assembl.ch/privkey.pem"),
+    cert: fs.readFileSync("/etc/letsencrypt/live/accounts.assembl.ch/cert.pem"),
+    ca: fs.readFileSync("/etc/letsencrypt/live/accounts.assembl.ch/chain.pem"),
     requestCert: false,
     rejectUnauthorized: false
 });
