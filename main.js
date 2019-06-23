@@ -1,9 +1,9 @@
 const console = require('console');
 const fs = require('fs');
 const server = require('https').createServer({
-    key: fs.readFileSync("/etc/letsencrypt/live/socket.assembl.science/privkey.pem"),
-    cert: fs.readFileSync("/etc/letsencrypt/live/socket.assembl.science/cert.pem"),
-    ca: fs.readFileSync("/etc/letsencrypt/live/socket.assembl.science/chain.pem"),
+    key: fs.readFileSync("/etc/letsencrypt/live/socket.assembl.ch/privkey.pem"),
+    cert: fs.readFileSync("/etc/letsencrypt/live/socket.assembl.ch/cert.pem"),
+    ca: fs.readFileSync("/etc/letsencrypt/live/socket.assembl.ch/chain.pem"),
     requestCert: false,
     rejectUnauthorized: false
 });
@@ -11,7 +11,7 @@ const io = require('socket.io')(server, {
     pingInterval: 50000,
     pingTimeout: 150000
 });
-// io.origins(['https://www.assembl.science:443', 'https://app.assembl.science:443']);
+// io.origins(['https://www.assembl.ch:443', 'https://app.assembl.ch:443']);
 const ss = require('socket.io-stream');
 
 let assemblIDs = {};
@@ -222,10 +222,6 @@ io.on('connect', function(socket) {
 
 server.listen(2998);
 console.log("Server is up and running on port 2998");
-
-setInterval(function(){
-    // global.gc();
-}, 30000);
 
 process.on('SIGTERM', function() {
     console.log("Stopping server...");
