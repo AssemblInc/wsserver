@@ -17,7 +17,7 @@ const ss = require('socket.io-stream');
 let assemblIDs = {};
 let otherData = {};
 let outgoingStreams = {};
-let requiredOtherData = ["assembl_id", "org_affiliation", "user_name"];
+let requiredOtherData = ["assembl_id", "org_affiliation", "user_name", "orcid_id"];
 requiredOtherData = requiredOtherData.sort();
 let assemblIDPattern = /^AS([A-Z0-9]{10})$/;
 
@@ -155,8 +155,8 @@ io.on('connect', function(socket) {
                 let otherSocketID = getSocketID(assembl_id);
                 let userData = getUserData(socket.id);
                 let senderData = getUserData(otherSocketID);
-                socket.to(otherSocketID).emit("as_connection_request", userData["assembl_id"], userData["user_name"], userData["org_affiliation"]);
-                socket.emit("as_connecting_to", senderData["assembl_id"], senderData["user_name"], senderData["org_affiliation"]);
+                socket.to(otherSocketID).emit("as_connection_request", userData["assembl_id"], userData["user_name"], userData["org_affiliation"], userData["orcid_id"]);
+                socket.emit("as_connecting_to", senderData["assembl_id"], senderData["user_name"], senderData["org_affiliation"], userData["orcid_id"]);
             }
             else {
                 socket.emit("as_error", "client_not_connected", assembl_id + " is offline");
@@ -174,10 +174,10 @@ io.on('connect', function(socket) {
                 let receiverData = getUserData(otherSocketID);
                 let receiverSocket = io.sockets.connected[otherSocketID];
                 receiverSocket.join(socket.id);
-                receiverSocket.to(socket.id).emit("as_connection_made", receiverData["assembl_id"], receiverData["user_name"], receiverData["org_affiliation"]);
+                receiverSocket.to(socket.id).emit("as_connection_made", receiverData["assembl_id"], receiverData["user_name"], receiverData["org_affiliation"], receiverData["orcid_id"]);
                 receiverSocket.emit("as_success", "connection_established", "Connected to " + userData["assembl_id"]);
                 ss(receiverSocket).emit('as_stream_for_receiver', outgoingStreams[socket.id]);
-                receiverSocket.emit("as_connected_to", userData["assembl_id"], userData["user_name"], userData["org_affiliation"]);
+                receiverSocket.emit("as_connected_to", userData["assembl_id"], userData["user_name"], userData["org_affiliation"], userData["orcid_id"]);
             }
         }
         else {
@@ -190,7 +190,7 @@ io.on('connect', function(socket) {
                 let otherSocketID = getSocketID(assembl_id);
                 let userData = getUserData(socket.id);
                 let receiverSocket = io.sockets.connected[otherSocketID];
-                receiverSocket.emit("as_connection_rejected", userData["assembl_id"], userData["user_name"], userData["org_affiliation"]);
+                receiverSocket.emit("as_connection_rejected", userData["assembl_id"], userData["user_name"], userData["org_affiliation"], userData["orcid_id"]);
             }
         }
         else {
