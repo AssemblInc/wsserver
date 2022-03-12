@@ -1,0 +1,13 @@
+[Unit]
+Description=Assembl Websocket server for use with Assembl Triton
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=3
+User=root
+ExecStart=/usr/bin/env node ***REMOVED_ASSEMBL_WSSERVER_PATH***/main.js
+
+[Install]
+WantedBy=multi-user.target
