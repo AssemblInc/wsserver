@@ -17,7 +17,7 @@
     "console": "^0.7.2",
     "fs": "0.0.1-security",
     "https": "^1.0.0",
-    "socket.io": "^2.2.0",
+    "socket.io": "^2.4.1",
     "socket.io-stream": "^0.9.1"
   }
 }
